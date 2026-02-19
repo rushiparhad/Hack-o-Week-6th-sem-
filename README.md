@@ -158,6 +158,8 @@ Through Hack-o-Week, the following skills were developed:
 ## 👨‍💻 Author
 
 Rushi Parhad\
+Ravi Kumar Kushwaha\
+Prathmesh Durge\
 6th Semester Engineering Project -- Hack-o-Week Series
 
 ------------------------------------------------------------------------
