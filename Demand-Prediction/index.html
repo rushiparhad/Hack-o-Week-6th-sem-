@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Lunch Demand Prediction</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<h2>Live Lunch Demand Prediction</h2>
+<canvas id="chart" width="800" height="400"></canvas>
+
+<script>
+const ctx = document.getElementById('chart').getContext('2d');
+
+let labels = [];
+let dataPoints = [];
+
+const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Predicted Demand',
+            data: dataPoints,
+            borderColor: 'blue',
+            borderWidth: 2,
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        animation: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+
+// CONNECT TO WEBSOCKET
+const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+ws.onopen = () => {
+    console.log("WebSocket connected ✅");
+};
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    console.log("Received:", data);
+
+    labels.push(new Date().toLocaleTimeString());
+    dataPoints.push(data.predicted_demand);
+
+    // keep only last 20 points
+    if (labels.length > 20) {
+        labels.shift();
+        dataPoints.shift();
+    }
+
+    chart.update();
+};
+
+ws.onerror = function(error) {
+    console.log("WebSocket error:", error);
+};
+</script>
+
+</body>
+</html>
