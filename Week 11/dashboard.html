@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Wearable Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --blue:#3b82f6; --indigo:#6366f1; --green:#10b981; --purple:#8b5cf6;
+      --red:#ef4444; --yellow:#f59e0b; --bg:#020817; --card:#0a0f1e;
+      --border:rgba(255,255,255,.07); --muted:#64748b; --text:#f1f5f9;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+
+    /* ── Orb bg ── */
+    .orb{position:fixed;border-radius:50%;filter:blur(100px);opacity:.12;pointer-events:none;animation:drift 16s ease-in-out infinite alternate;}
+    .orb1{width:700px;height:700px;background:#3b82f6;top:-300px;left:-200px;}
+    .orb2{width:500px;height:500px;background:#8b5cf6;bottom:-200px;right:-100px;animation-delay:-6s;}
+    .orb3{width:350px;height:350px;background:#10b981;top:50%;left:50%;animation-delay:-11s;}
+    @keyframes drift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(40px,30px) scale(1.1);}}
+    .grid-bg{position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;}
+
+    /* ── Layout ── */
+    .layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh;position:relative;z-index:1;}
+
+    /* ── Sidebar ── */
+    .sidebar{
+      background:rgba(10,15,30,.8);backdrop-filter:blur(20px);
+      border-right:1px solid var(--border);
+      display:flex;flex-direction:column;padding:24px 0;
+      position:sticky;top:0;height:100vh;overflow-y:auto;
+    }
+    .sb-logo{display:flex;align-items:center;gap:11px;padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+    .sb-logo-box{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;box-shadow:0 4px 16px rgba(99,102,241,.4);}
+    .sb-logo h2{font-size:1rem;font-weight:800;letter-spacing:-.02em;}
+    .sb-logo h2 span{color:var(--blue);}
+    .nav-label{padding:8px 20px 4px;font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;color:#334155;font-weight:600;}
+    .nav-item{
+      display:flex;align-items:center;gap:11px;padding:10px 20px;
+      color:var(--muted);font-size:.88rem;cursor:pointer;border:none;background:none;
+      font-family:'Inter',sans-serif;width:100%;text-align:left;
+      border-left:2px solid transparent;transition:all .18s;
+    }
+    .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text);}
+    .nav-item.active{background:rgba(59,130,246,.1);color:#93c5fd;border-left-color:var(--blue);}
+    .nav-item svg{flex-shrink:0;opacity:.8;}
+    .sb-footer{margin-top:auto;padding:20px;border-top:1px solid var(--border);}
+    .user-row{display:flex;align-items:center;gap:11px;}
+    .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:grid;place-items:center;font-weight:700;font-size:.85rem;flex-shrink:0;}
+    .user-name{font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-email{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .logout-btn{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;display:flex;align-items:center;transition:color .2s;}
+    .logout-btn:hover{color:#f87171;}
+
+    /* ── Main ── */
+    .main{padding:32px;overflow-y:auto;}
+    .page-header{margin-bottom:28px;}
+    .page-header h1{font-size:1.6rem;font-weight:800;letter-spacing:-.03em;margin-bottom:4px;}
+    .page-header p{color:var(--muted);font-size:.9rem;}
+    section{display:none;}
+    section.active{display:block;animation:fadeUp .25s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+    /* ── Stat cards ── */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:28px;}
+    .stat-card{
+      background:rgba(10,15,30,.6);backdrop-filter:blur(12px);
+      border:1px solid var(--border);border-radius:16px;padding:20px;
+      transition:border-color .2s,transform .2s;
+    }
+    .stat-card:hover{border-color:rgba(59,130,246,.25);transform:translateY(-2px);}
+    .stat-ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;margin-bottom:12px;}
+    .stat-lbl{font-size:.73rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;margin-bottom:4px;}
+    .stat-val{font-size:1.9rem;font-weight:800;line-height:1;letter-spacing:-.04em;}
+    .stat-unit{font-size:.8rem;color:var(--muted);margin-top:2px;}
+
+    /* ── Card ── */
+    .card{
+      background:rgba(10,15,30,.6);backdrop-filter:blur(12px);
+      border:1px solid var(--border);border-radius:18px;padding:24px;
+      margin-bottom:20px;
+    }
+    .card-h{font-size:.95rem;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+    .card-h svg{opacity:.7;}
+
+    /* ── Form ── */
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .field{margin-bottom:0;}
+    label{display:block;font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;margin-top:14px;}
+    .inp-wrap{position:relative;}
+    .inp-wrap .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#334155;pointer-events:none;}
+    input,select,textarea{
+      width:100%;padding:10px 12px 10px 38px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      border-radius:10px;color:var(--text);font-size:.9rem;font-family:'Inter',sans-serif;
+      outline:none;transition:border-color .2s,box-shadow .2s;
+    }
+    input:focus,select:focus,textarea:focus{border-color:rgba(99,102,241,.5);box-shadow:0 0 0 3px rgba(99,102,241,.1);}
+    input::placeholder,textarea::placeholder{color:#1e293b;}
+    select option{background:#0a0f1e;}
+    textarea{padding:11px 14px;resize:vertical;min-height:100px;font-family:'JetBrains Mono','Fira Code',monospace;font-size:.82rem;line-height:1.5;}
+    .full{grid-column:1/-1;}
+
+    /* ── Btn ── */
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 22px;border:none;border-radius:11px;cursor:pointer;
+      font-family:'Inter',sans-serif;font-size:.9rem;font-weight:700;color:#fff;
+      transition:opacity .2s,transform .15s;
+    }
+    .btn:hover{opacity:.9;transform:translateY(-1px);}
+    .btn:active{transform:scale(.97);}
+    .btn:disabled{opacity:.45;pointer-events:none;}
+    .btn-blue{background:linear-gradient(135deg,#3b82f6,#6366f1);box-shadow:0 6px 20px rgba(99,102,241,.3);}
+    .btn-green{background:linear-gradient(135deg,#10b981,#059669);box-shadow:0 6px 20px rgba(16,185,129,.25);}
+    .btn-outline{background:rgba(255,255,255,.05);border:1px solid var(--border);}
+    .btn-outline:hover{background:rgba(255,255,255,.09);}
+    .btn-sm{padding:6px 14px;font-size:.8rem;border-radius:8px;}
+    .spin{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+
+    /* ── Alert ── */
+    .alert{display:none;padding:11px 15px;border-radius:10px;font-size:.86rem;align-items:center;gap:8px;margin-top:14px;}
+    .alert.ok{display:flex;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#6ee7b7;}
+    .alert.err{display:flex;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#fca5a5;}
+    .alert.info{display:flex;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.25);color:#93c5fd;}
+
+    /* ── Templates ── */
+    .tpls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;}
+    .tpl{padding:5px 13px;border:1px solid var(--border);background:rgba(255,255,255,.03);border-radius:999px;color:var(--muted);cursor:pointer;font-size:.78rem;font-family:'Inter',sans-serif;transition:all .18s;}
+    .tpl:hover{border-color:rgba(59,130,246,.4);color:#93c5fd;background:rgba(59,130,246,.07);}
+
+    /* ── Table ── */
+    .tbl-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.86rem;}
+    th{text-align:left;padding:9px 12px;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:#334155;border-bottom:1px solid var(--border);}
+    td{padding:12px;border-bottom:1px solid rgba(30,40,60,.5);vertical-align:top;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:rgba(255,255,255,.02);}
+    .badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:.74rem;font-weight:600;}
+    .badge-blue{background:rgba(59,130,246,.15);color:#93c5fd;}
+    .badge-red{background:rgba(239,68,68,.15);color:#fca5a5;}
+    .badge-green{background:rgba(16,185,129,.15);color:#6ee7b7;}
+    .badge-purple{background:rgba(139,92,246,.15);color:#c4b5fd;}
+    .badge-yellow{background:rgba(245,158,11,.15);color:#fcd34d;}
+    pre.payload{font-size:.76rem;color:var(--muted);white-space:pre-wrap;font-family:'JetBrains Mono','Fira Code',monospace;}
+    details summary{cursor:pointer;color:#60a5fa;font-size:.8rem;list-style:none;}
+    details summary::-webkit-details-marker{display:none;}
+
+    /* ── Empty ── */
+    .empty{text-align:center;color:#1e293b;padding:36px;font-size:.9rem;}
+
+    @media(max-width:768px){
+      .layout{grid-template-columns:1fr;}
+      .sidebar{display:none;}
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .grid2{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
+<div class="grid-bg"></div>
+
+<div class="layout">
+
+  <!-- ───────── Sidebar ───────── -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3 6 12H2"/></svg>
+      </div>
+      <h2>Wearable<span>Portal</span></h2>
+    </div>
+
+    <div class="nav-label">Menu</div>
+    <button class="nav-item active" data-page="overview" onclick="nav('overview',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Overview
+    </button>
+    <button class="nav-item" data-page="sync" onclick="nav('sync',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      Sync Data
+    </button>
+    <button class="nav-item" data-page="history" onclick="nav('history',this)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      History
+    </button>
+
+    <div class="sb-footer">
+      <div class="user-row">
+        <div class="avatar" id="sb-avatar">?</div>
+        <div style="flex:1;min-width:0">
+          <div class="user-name" id="sb-name">Loading…</div>
+          <div class="user-email" id="sb-email"></div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()" title="Sign out">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ───────── Main ───────── -->
+  <main class="main">
+
+    <!-- ── Overview ── -->
+    <section id="sec-overview" class="active">
+      <div class="page-header">
+        <h1>Overview</h1>
+        <p>Your latest health snapshot from synced wearables</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-ico" style="background:rgba(239,68,68,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div class="stat-lbl">Heart Rate</div>
+          <div class="stat-val" id="s-hr">—</div>
+          <div class="stat-unit">bpm</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:rgba(59,130,246,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="stat-lbl">Steps</div>
+          <div class="stat-val" id="s-steps">—</div>
+          <div class="stat-unit">today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:rgba(139,92,246,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="stat-lbl">Sleep</div>
+          <div class="stat-val" id="s-sleep">—</div>
+          <div class="stat-unit">hours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico" style="background:rgba(16,185,129,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <div class="stat-lbl">SpO₂</div>
+          <div class="stat-val" id="s-spo2">—</div>
+          <div class="stat-unit">%</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Recent Sync Activity
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Date</th><th>Key Metric</th><th>Synced At</th></tr></thead>
+            <tbody id="ov-table"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Sync ── -->
+    <section id="sec-sync">
+      <div class="page-header">
+        <h1>Sync Data</h1>
+        <p>Push health metrics from your wearable — encrypted before storage</p>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          Wearable Sync
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="font-size:.75rem;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Quick Templates</div>
+          <div class="tpls">
+            <button class="tpl" onclick="fillTpl('heart_rate',{value:72,unit:'bpm'})">❤️ Heart Rate</button>
+            <button class="tpl" onclick="fillTpl('steps',{count:8400,distance_km:6.1})">👣 Steps</button>
+            <button class="tpl" onclick="fillTpl('sleep',{hours:7.5,quality_score:84})">💤 Sleep</button>
+            <button class="tpl" onclick="fillTpl('spo2',{value:98,unit:'%'})">🫁 SpO₂</button>
+            <button class="tpl" onclick="fillTpl('blood_pressure',{systolic:118,diastolic:76,unit:'mmHg'})">🩸 BP</button>
+            <button class="tpl" onclick="fillTpl('calories',{burned:420,active_minutes:45})">🔥 Calories</button>
+          </div>
+        </div>
+
+        <form id="sync-form" onsubmit="doSync(event)">
+          <div class="grid2">
+            <div>
+              <label>Data Type *</label>
+              <div class="inp-wrap">
+                <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                <select id="f-dtype">
+                  <option value="heart_rate">Heart Rate</option>
+                  <option value="steps">Steps</option>
+                  <option value="sleep">Sleep</option>
+                  <option value="spo2">SpO₂</option>
+                  <option value="blood_pressure">Blood Pressure</option>
+                  <option value="calories">Calories</option>
+                  <option value="stress">Stress Level</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label>Record Date *</label>
+              <div class="inp-wrap">
+                <svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <input type="date" id="f-date"/>
+              </div>
+            </div>
+            <div class="full">
+              <label>Payload (JSON) *</label>
+              <textarea id="f-json" placeholder='{ "value": 72, "unit": "bpm" }'></textarea>
+            </div>
+          </div>
+          <div style="margin-top:16px">
+            <button class="btn btn-green" type="submit" id="sync-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              <span id="sync-lbl">Encrypt &amp; Sync</span>
+            </button>
+          </div>
+        </form>
+        <div class="alert" id="sync-alert"></div>
+      </div>
+    </section>
+
+    <!-- ── History ── -->
+    <section id="sec-history">
+      <div class="page-header">
+        <h1>History</h1>
+        <p>All your wearable records — decrypted in real-time on request</p>
+      </div>
+      <div class="card">
+        <div class="card-h" style="justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Sync History
+          </span>
+          <button class="btn btn-outline btn-sm" onclick="loadHistory()">↻ Refresh</button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th>Type</th><th>Date</th><th>Payload</th><th>Synced At</th></tr></thead>
+            <tbody id="hist-table"><tr><td colspan="4" class="empty">Loading…</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+const API = "http://127.0.0.1:8000";
+const token = localStorage.getItem("token");
+if (!token) location.href = "index.html";
+
+const headers = {"Content-Type":"application/json", "Authorization":"Bearer "+token};
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+(async () => {
+  const r = await fetch(API+"/me", {headers}).catch(()=>null);
+  if (!r || !r.ok) { localStorage.removeItem("token"); location.href="index.html"; return; }
+  const u = await r.json();
+  document.getElementById("sb-name").textContent  = u.username;
+  document.getElementById("sb-email").textContent = u.email;
+  document.getElementById("sb-avatar").textContent = u.username[0].toUpperCase();
+  document.getElementById("f-date").value = new Date().toISOString().split("T")[0];
+  loadOverview();
+})();
+
+// ── Navigation ────────────────────────────────────────────────────────────────
+function nav(page, el) {
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.remove("active"));
+  document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+  el.classList.add("active");
+  document.getElementById("sec-"+page).classList.add("active");
+  if (page==="history") loadHistory();
+  if (page==="overview") loadOverview();
+}
+
+// ── Load overview ─────────────────────────────────────────────────────────────
+async function loadOverview() {
+  const r = await fetch(API+"/wearable", {headers}).catch(()=>null);
+  if (!r || !r.ok) return;
+  const rows = await r.json();
+
+  // Latest per type
+  const latest = {};
+  rows.forEach(row => { if (!latest[row.data_type]) latest[row.data_type] = row; });
+
+  const pick = (type, key) => {
+    const r = latest[type]; if (!r) return "—";
+    return r.payload[key] ?? r.payload.value ?? "—";
+  };
+  document.getElementById("s-hr").textContent    = pick("heart_rate","value");
+  document.getElementById("s-steps").textContent = pick("steps","count");
+  document.getElementById("s-sleep").textContent = pick("sleep","hours");
+  document.getElementById("s-spo2").textContent  = pick("spo2","value");
+
+  const tbody = document.getElementById("ov-table");
+  if (!rows.length) { tbody.innerHTML='<tr><td colspan="4" class="empty">No data yet — go sync something!</td></tr>'; return; }
+  tbody.innerHTML = rows.slice(0,8).map(r=>`
+    <tr>
+      <td>${badge(r.data_type)}</td>
+      <td style="color:var(--muted);font-size:.83rem">${r.record_date}</td>
+      <td style="font-size:.82rem;color:#60a5fa;font-family:monospace">${keyMetric(r.data_type,r.payload)}</td>
+      <td style="color:var(--muted);font-size:.78rem">${fmtDate(r.synced_at)}</td>
+    </tr>`).join("");
+}
+
+// ── Load history ──────────────────────────────────────────────────────────────
+async function loadHistory() {
+  document.getElementById("hist-table").innerHTML='<tr><td colspan="4" class="empty">Loading…</td></tr>';
+  const r = await fetch(API+"/wearable", {headers}).catch(()=>null);
+  if (!r || !r.ok) { document.getElementById("hist-table").innerHTML='<tr><td colspan="4" class="empty" style="color:#f87171">Failed to load.</td></tr>'; return; }
+  const rows = await r.json();
+  if (!rows.length) { document.getElementById("hist-table").innerHTML='<tr><td colspan="4" class="empty">No records yet.</td></tr>'; return; }
+  document.getElementById("hist-table").innerHTML = rows.map(r=>`
+    <tr>
+      <td>${badge(r.data_type)}</td>
+      <td style="color:var(--muted);font-size:.83rem;white-space:nowrap">${r.record_date}</td>
+      <td>
+        <details>
+          <summary>View payload</summary>
+          <pre class="payload" style="margin-top:8px">${JSON.stringify(r.payload,null,2)}</pre>
+        </details>
+      </td>
+      <td style="color:var(--muted);font-size:.78rem;white-space:nowrap">${fmtDate(r.synced_at)}</td>
+    </tr>`).join("");
+}
+
+// ── Sync form ─────────────────────────────────────────────────────────────────
+function fillTpl(type, obj) {
+  document.getElementById("f-dtype").value = type;
+  document.getElementById("f-json").value  = JSON.stringify(obj, null, 2);
+}
+
+async function doSync(e) {
+  e.preventDefault();
+  const jsonStr = document.getElementById("f-json").value.trim();
+  let payload;
+  try { payload = JSON.parse(jsonStr); } catch {
+    setAlert("sync-alert","Invalid JSON — check your payload.","err"); return;
+  }
+  const body = {
+    data_type:   document.getElementById("f-dtype").value,
+    record_date: document.getElementById("f-date").value,
+    payload
+  };
+  if (!body.record_date) { setAlert("sync-alert","Please pick a record date.","err"); return; }
+
+  setLoading("sync-btn","sync-lbl",true,"Encrypting…");
+  try {
+    const r = await fetch(API+"/wearable", {method:"POST",headers,body:JSON.stringify(body)});
+    const d = await r.json();
+    if (r.ok) {
+      setAlert("sync-alert","✓ Synced and encrypted successfully!","ok");
+      document.getElementById("sync-form").reset();
+      document.getElementById("f-date").value = new Date().toISOString().split("T")[0];
+    } else {
+      setAlert("sync-alert",d.detail||"Sync failed.","err");
+    }
+  } catch { setAlert("sync-alert","Cannot reach server.","err"); }
+  finally { setLoading("sync-btn","sync-lbl",false,"Encrypt & Sync"); }
+}
+
+// ── Logout ────────────────────────────────────────────────────────────────────
+function doLogout() {
+  localStorage.removeItem("token");
+  location.href = "index.html";
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function setAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  el.className = "alert "+type;
+  el.textContent = msg;
+  if (type !== "info") setTimeout(() => el.className="alert", 4000);
+}
+
+function setLoading(btnId, lblId, on, text) {
+  const btn = document.getElementById(btnId);
+  const lbl = document.getElementById(lblId);
+  btn.disabled = on;
+  lbl.textContent = text;
+}
+
+function badge(type) {
+  const map = {
+    heart_rate:["badge-red","❤️ Heart Rate"],
+    steps:["badge-blue","👣 Steps"],
+    sleep:["badge-purple","💤 Sleep"],
+    spo2:["badge-green","🫁 SpO₂"],
+    blood_pressure:["badge-red","🩸 BP"],
+    calories:["badge-yellow","🔥 Calories"],
+    stress:["badge-purple","🧠 Stress"],
+  };
+  const [cls,lbl] = map[type]||["badge-blue",type];
+  return `<span class="badge ${cls}">${lbl}</span>`;
+}
+
+function keyMetric(type, p) {
+  const m = {heart_rate:`${p.value} bpm`,steps:`${(p.count||p.value||0).toLocaleString()} steps`,sleep:`${p.hours||p.duration_hours||p.value} hrs`,spo2:`${p.value}%`,blood_pressure:`${p.systolic}/${p.diastolic} mmHg`,calories:`${p.burned||p.value} kcal`};
+  return m[type] || JSON.stringify(p).slice(0,40);
+}
+
+function fmtDate(s) {
+  if (!s) return "—";
+  return new Date(s).toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+}
+</script>
+</body>
+</html>
