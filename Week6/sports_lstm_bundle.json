@@ -1,0 +1,66 @@
+{
+  "metrics": {
+    "mae": 77.66756439208984,
+    "rmse": 85.60801325573296,
+    "r2": -4.653270721435547,
+    "train_samples": 837,
+    "test_samples": 210
+  },
+  "scaler": {
+    "means": {
+      "electricity_kwh": 131.9814146825397,
+      "temperature_c": 26.980251984126983,
+      "hour_sin": -1.9032394707859827e-17,
+      "hour_cos": -5.921189464667501e-17,
+      "is_weekend": 0.2857142857142857,
+      "is_event_day": 1.0,
+      "attendance_scaled": 0.17787204463869133,
+      "kwh_lag1": 131.98394841269842,
+      "kwh_lag2": 131.98530753968254
+    },
+    "stds": {
+      "electricity_kwh": 25.52271989429034,
+      "temperature_c": 4.414707971486076,
+      "hour_sin": 0.7071769411094454,
+      "hour_cos": 0.7071769411094454,
+      "is_weekend": 0.45179877498316734,
+      "is_event_day": 1.0,
+      "attendance_scaled": 0.1951001264799481,
+      "kwh_lag1": 25.52085532976059,
+      "kwh_lag2": 25.52001266579343
+    },
+    "feature_cols": [
+      "electricity_kwh",
+      "temperature_c",
+      "hour_sin",
+      "hour_cos",
+      "is_weekend",
+      "is_event_day",
+      "attendance_scaled",
+      "kwh_lag1",
+      "kwh_lag2"
+    ],
+    "seq_len": 6,
+    "post_event_hours": [
+      0,
+      1,
+      2,
+      22,
+      23
+    ]
+  },
+  "feature_columns": [
+    "electricity_kwh",
+    "temperature_c",
+    "hour_sin",
+    "hour_cos",
+    "is_weekend",
+    "is_event_day",
+    "attendance_scaled",
+    "kwh_lag1",
+    "kwh_lag2"
+  ],
+  "model_path": "sports_lstm_model.keras",
+  "data_path": "sports_energy_hourly.csv",
+  "predictions_path": "post_event_predictions.csv"
+}

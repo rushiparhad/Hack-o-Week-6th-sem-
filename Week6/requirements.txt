@@ -1,0 +1,8 @@
+pandas
+numpy<2
+scikit-learn
+streamlit
+plotly
+joblib
+tensorflow-macos
+tensorflow-metal
