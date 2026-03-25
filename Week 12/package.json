@@ -1,0 +1,13 @@
+{
+  "name": "wearable-health-dashboard",
+  "version": "1.0.0",
+  "description": "Real-time wearable health monitoring demo",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "simulate": "node wearable_simulator.js"
+  },
+  "dependencies": {
+    "ws": "^8.16.0"
+  }
+}
