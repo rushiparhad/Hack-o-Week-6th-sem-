@@ -1,0 +1,11 @@
+timestamp,loadCount,hostelBlock,machineType,dayOfWeek,hourOfDay
+2026-01-01T06:00:00Z,8,A,washer,4,6
+2026-01-01T07:00:00Z,15,A,washer,4,7
+2026-01-01T08:00:00Z,19,B,dryer,4,8
+2026-01-01T18:00:00Z,27,C,washer,4,18
+2026-01-01T19:00:00Z,31,D,washer,4,19
+2026-01-01T21:00:00Z,26,E,dryer,4,21
+2026-01-02T09:00:00Z,21,B,washer,5,9
+2026-01-02T20:00:00Z,34,C,washer,5,20
+2026-01-03T11:00:00Z,18,A,dryer,6,11
+2026-01-03T22:00:00Z,29,D,washer,6,22
