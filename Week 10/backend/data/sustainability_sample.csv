@@ -1,0 +1,8 @@
+timestamp,campus,department,building,energyConsumption,waterUsage,carbonEmissions,wasteGenerated
+2026-03-25,Main Campus,Engineering,Innovation Block,622.15,389.40,267.18,121.43
+2026-03-25,Main Campus,Sciences,Bio Sciences,548.22,356.91,230.93,109.77
+2026-03-25,Main Campus,Administration,Admin Hub,501.40,322.18,209.44,97.61
+2026-03-26,Main Campus,Hostels,North Hostel,593.13,374.02,248.87,133.56
+2026-03-26,Main Campus,Sports,Sports Complex,640.07,404.35,270.89,138.42
+2026-03-27,Main Campus,Engineering,Robotics Center,668.72,414.08,282.14,127.93
+2026-03-27,Main Campus,Sciences,Physics Tower,577.64,364.39,239.88,112.74

@@ -1,5 +1,5 @@
 {
-  "name": "hostel-laundry-backend",
+  "name": "campus-sustainability-backend",
   "version": "1.0.0",
   "main": "src/server.js",
   "type": "commonjs",
@@ -9,14 +9,13 @@
     "seed": "node scripts/seedData.js"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
-    "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
+    "json2csv": "^6.0.0-alpha.2",
     "mongoose": "^8.10.0",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"

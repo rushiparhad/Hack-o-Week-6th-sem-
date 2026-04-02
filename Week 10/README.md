@@ -1,203 +1,186 @@
-# Campus-wide Sustainability Tracker 🌍
+# Campus-Wide Sustainability Tracker
 
-> Turning raw campus data into smart sustainability action. 📊♻️
+Production-ready full-stack dashboard for campus sustainability analytics with ensemble forecasting.
 
-[![Node.js](https://img.shields.io/badge/Node.js-18%2B-3C873A?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
-[![React](https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
-[![Express](https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+## What It Solves
 
----
+The app tracks and predicts four key sustainability metrics:
 
-## ✨ Project Vision
+- Carbon footprint (kg CO2)
+- Energy consumption (kWh)
+- Water usage (liters)
+- Waste generation (kg)
 
-Campuses produce huge sustainability signals every day: energy usage, water consumption, and resource efficiency patterns.
+It combines data engineering, forecasting, and a premium SaaS-style interface so administrators can monitor trends, detect anomalies, and act faster.
 
-This project builds a **campus intelligence dashboard** that helps administrators and student leaders:
+## Core Capabilities
 
-- detect high-impact areas quickly 🔎
-- monitor trends over time 📈
-- take data-driven sustainability decisions 🌱
-- communicate outcomes with export-ready reports 🧾
+- Time-series campus data ingestion and seeding
+- Ensemble analytics: linear regression + moving average + exponential smoothing
+- KPI cards with live updates and period-over-period comparison
+- Drill-down filters by campus, department, building, and date range
+- Building-vs-building comparison mode
+- Smart anomaly detection and recommendations
+- CSV export for reports
+- Responsive light/dark modern UI with glassmorphism and animations
 
----
+## Tech Stack
 
-## 🚀 Key Features
+### Frontend
 
-- KPI cards for top-level sustainability indicators
-- Forecasting panel for trend anticipation
-- Drill-down analytics by department and building
-- Global filters for date range, building, and department
-- CSV export from API and PDF-friendly frontend reporting
-- Responsive UI for desktop and laptop dashboards
+- React + Vite
+- Tailwind CSS
+- Recharts
+- Framer Motion
+- Lucide React
 
----
+### Backend
 
-## 🧠 System Flow
+- Node.js + Express
+- MongoDB + Mongoose
+- Zod
+- json2csv
 
-```text
-React (Vite) Dashboard UI
-        |
-        | HTTP (Axios)
-        v
-Express API (routes -> controllers -> services)
-        |
-        | Mongoose
-        v
-MongoDB
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Tools |
-|---|---|
-| Frontend | React, Vite, Recharts, Axios, date-fns, jsPDF |
-| Backend | Node.js, Express, Mongoose, Zod, json2csv |
-| Tooling | Concurrently, Nodemon, ESLint |
-
----
-
-## 📁 Week 10 Structure
+## Project Structure
 
 ```text
 Week 10/
 ├── package.json
 ├── README.md
-├── server/      # primary backend used by root scripts
-├── client/      # primary frontend used by root scripts
-├── backend/     # alternate/parallel backend track
-└── frontend/    # alternate/parallel frontend track
+├── backend/
+│   ├── data/
+│   │   └── sampleData.js
+│   ├── scripts/
+│   │   └── seedData.js
+│   └── src/
+│       ├── app.js
+│       ├── server.js
+│       ├── config/
+│       ├── controllers/
+│       ├── middleware/
+│       ├── models/
+│       ├── routes/
+│       ├── services/
+│       └── utils/
+└── frontend/
+    ├── src/
+    │   ├── api/
+    │   ├── components/
+    │   ├── hooks/
+    │   ├── pages/
+    │   └── styles/
+    ├── tailwind.config.js
+    └── postcss.config.js
 ```
 
----
+## Setup (Step by Step)
 
-## ⚡ Quick Start
-
-### 1) Install dependencies
+### 1. Install dependencies
 
 ```bash
 npm install
-npm install --prefix server
-npm install --prefix client
+npm install --prefix backend
+npm install --prefix frontend
 ```
 
-### 2) Configure backend environment
+### 2. Configure environment
 
 PowerShell:
 
 ```powershell
-Copy-Item server/.env.example server/.env
+Copy-Item backend/.env.example backend/.env
 ```
 
-Recommended `server/.env` values:
+Set these values in `backend/.env`:
 
 ```env
 PORT=5050
 MONGO_URI=mongodb://127.0.0.1:27017/campus_sustainability
-CLIENT_ORIGIN=http://localhost:5173,http://localhost:5175
+CLIENT_ORIGIN=http://localhost:5173
+NODE_ENV=development
 ```
 
-### 3) Seed sample data
+### 3. Seed sample data
 
 ```bash
 npm run seed
 ```
 
-### 4) Run full stack
+### 4. Run full stack
 
 ```bash
 npm run dev
 ```
 
-Local URLs:
+### 5. Open locally
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:5050
+- Backend: http://localhost:5050
 
----
-
-## 🎛️ Available Scripts
-
-### Root
-
-```bash
-npm run dev     # run client + server in parallel
-npm run build   # build client
-npm run start   # start server in production mode
-npm run seed    # seed sustainability data
-```
-
-### Client
-
-```bash
-npm run dev
-npm run build
-npm run lint
-npm run preview
-```
-
-### Server
-
-```bash
-npm run dev
-npm run start
-npm run seed
-```
-
----
-
-## 🌐 API Overview
+## API Endpoints
 
 Base path: `/api`
 
-| Method | Endpoint | Purpose |
-|---|---|---|
-| GET | /api/health | Health check |
-| GET | /api/dashboard | KPI + chart payload |
-| GET | /api/predictions | Forecast analytics |
-| GET | /api/drilldown | Building and department insights |
-| GET | /api/filters | Available filter values |
-| GET | /api/export/csv | Export filtered data as CSV |
+- `GET /api/health` health check
+- `GET /api/dashboard` KPI + trends + anomalies + recommendations
+- `GET /api/predictions` 7-day ensemble forecast
+- `GET /api/drilldown` building/department drilldown + optional comparison
+- `GET /api/filters` available filter metadata
+- `GET /api/export/csv` export trend report
+- `GET /api/stream` SSE stream for live KPI refresh
 
-Common query params:
+### Common Query Parameters
 
-- `from` (YYYY-MM-DD)
-- `to` (YYYY-MM-DD)
+- `from`, `to` (YYYY-MM-DD)
+- `campus`
 - `department`
 - `building`
+- `compareA`, `compareB`
 
----
+## Ensemble Modeling Notes
 
-## 💡 Impact on Campus Operations
+The forecast pipeline blends:
 
-- Better resource allocation for sustainability teams
-- Faster identification of high-consumption zones
-- More transparent sustainability reporting
-- Stronger decision-making for campus planning
+1. Linear regression forecast for trend direction
+2. Exponential smoothing for recent signal stability
+3. Weighted blending for final forecast values
 
----
+Moving average is also computed for smoothed visualization in the dashboard.
 
-## 🔭 Next Improvements
+## Deployment
 
-- Role-based authentication and admin views
-- Automated weekly sustainability summaries via email
-- Real-time anomaly alerts for usage spikes
-- Multi-campus benchmarking and comparisons
+### Frontend (Vercel)
 
----
+- Set project root to `frontend`
+- Build command: `npm run build`
+- Output directory: `dist`
 
-## 🏁 Final Note
+### Backend (Render or Railway)
 
-Sustainability is not just about tracking numbers.
-It is about enabling smarter daily decisions across the entire campus ecosystem.
+- Set project root to `backend`
+- Build command: `npm install`
+- Start command: `npm run start`
+- Environment variables:
+  - `PORT`
+  - `MONGO_URI` (MongoDB Atlas)
+  - `CLIENT_ORIGIN`
+  - `NODE_ENV=production`
 
-**Measure clearly. Act faster. Build greener campuses.** 🌿
+### Database (MongoDB Atlas)
 
----
+- Create cluster
+- Add network access and DB user
+- Use Atlas connection string in `MONGO_URI`
 
-## 📄 License
+## Demo Readiness Checklist
+
+- App starts without runtime errors
+- Seed script inserts realistic data
+- Filters, drilldown, and comparison work
+- Forecast and smoothing charts render correctly
+- Dark/light theme toggle works
+- CSV export downloads successfully
+
+## License
 
 ISC

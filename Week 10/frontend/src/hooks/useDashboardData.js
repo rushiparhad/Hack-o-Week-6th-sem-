@@ -1,21 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import dayjs from "dayjs";
 
-import { fetchDashboard } from "../api/laundryApi";
+import {
+  fetchDashboard,
+  fetchDrilldown,
+  fetchFilters,
+  fetchPredictions,
+} from "../api/sustainabilityApi";
 
 const defaultRange = {
-  startDate: dayjs().subtract(21, "day").format("YYYY-MM-DD"),
-  endDate: dayjs().format("YYYY-MM-DD"),
+  from: dayjs().subtract(30, "day").format("YYYY-MM-DD"),
+  to: dayjs().format("YYYY-MM-DD"),
 };
 
 export function useDashboardData() {
   const [filters, setFilters] = useState({
     ...defaultRange,
-    block: "",
-    horizon: 48,
-    loadFactor: 1,
+    campus: "all",
+    department: "all",
+    building: "all",
+    compareA: "",
+    compareB: "",
   });
-  const [data, setData] = useState(null);
+  const [dashboard, setDashboard] = useState(null);
+  const [predictions, setPredictions] = useState(null);
+  const [drilldown, setDrilldown] = useState({ points: [], comparison: null });
+  const [metadata, setMetadata] = useState({ campuses: [], departments: [], buildings: [] });
+  const [liveKpis, setLiveKpis] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,9 +37,28 @@ export function useDashboardData() {
       try {
         setLoading(true);
         setError("");
-        const dashboard = await fetchDashboard(filters);
+        const spanDays = dayjs(filters.to).diff(dayjs(filters.from), "day") + 1;
+        const previousTo = dayjs(filters.from).subtract(1, "day").format("YYYY-MM-DD");
+        const previousFrom = dayjs(previousTo).subtract(Math.max(1, spanDays), "day").format("YYYY-MM-DD");
+
+        const query = {
+          ...filters,
+          previousFrom,
+          previousTo,
+        };
+
+        const [dashboardData, predictionData, drilldownData, filterData] = await Promise.all([
+          fetchDashboard(query),
+          fetchPredictions(query),
+          fetchDrilldown(query),
+          fetchFilters({ from: filters.from, to: filters.to }),
+        ]);
+
         if (mounted) {
-          setData(dashboard);
+          setDashboard(dashboardData);
+          setPredictions(predictionData);
+          setDrilldown(drilldownData || { points: [], comparison: null });
+          setMetadata(filterData || { campuses: [], departments: [], buildings: [] });
         }
       } catch (err) {
         if (mounted) {
@@ -48,16 +78,34 @@ export function useDashboardData() {
     };
   }, [filters]);
 
-  const stats = useMemo(() => {
-    if (!data) return null;
-    return data.kpis;
-  }, [data]);
+  useEffect(() => {
+    const search = new URLSearchParams({
+      from: filters.from,
+      to: filters.to,
+      campus: filters.campus,
+      department: filters.department,
+      building: filters.building,
+    });
+
+    const stream = new EventSource(`/api/stream?${search.toString()}`);
+    stream.onmessage = (event) => {
+      setLiveKpis(JSON.parse(event.data));
+    };
+    stream.onerror = () => {
+      stream.close();
+    };
+
+    return () => stream.close();
+  }, [filters.from, filters.to, filters.campus, filters.department, filters.building]);
 
   return {
     filters,
     setFilters,
-    data,
-    stats,
+    dashboard,
+    predictions,
+    drilldown,
+    metadata,
+    liveKpis,
     loading,
     error,
   };

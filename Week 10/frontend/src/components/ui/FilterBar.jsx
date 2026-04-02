@@ -1,61 +1,53 @@
-function FilterBar({ filters, onChange }) {
+function SelectField({ label, value, onChange, options, placeholder = "All" }) {
+  return (
+    <label className="text-xs text-slate-600 dark:text-slate-300">
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-100"
+      >
+        <option value="all">{placeholder}</option>
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function FilterBar({ filters, metadata, onChange }) {
   const update = (field, value) => onChange((prev) => ({ ...prev, [field]: value }));
 
   return (
-    <section className="filter-bar">
-      <label>
-        Start Date
+    <section className="glass-card grid gap-3 md:grid-cols-3 xl:grid-cols-7">
+      <label className="text-xs text-slate-600 dark:text-slate-300">
+        From
         <input
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-100"
           type="date"
-          value={filters.startDate}
-          onChange={(e) => update("startDate", e.target.value)}
+          value={filters.from}
+          onChange={(e) => update("from", e.target.value)}
         />
       </label>
 
-      <label>
-        End Date
+      <label className="text-xs text-slate-600 dark:text-slate-300">
+        To
         <input
+          className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 dark:border-white/10 dark:bg-white/10 dark:text-slate-100"
           type="date"
-          value={filters.endDate}
-          onChange={(e) => update("endDate", e.target.value)}
+          value={filters.to}
+          onChange={(e) => update("to", e.target.value)}
         />
       </label>
 
-      <label>
-        Hostel Block
-        <select value={filters.block} onChange={(e) => update("block", e.target.value)}>
-          <option value="">All Blocks</option>
-          <option value="A">Block A</option>
-          <option value="B">Block B</option>
-          <option value="C">Block C</option>
-          <option value="D">Block D</option>
-          <option value="E">Block E</option>
-        </select>
-      </label>
-
-      <label>
-        Forecast Horizon (hours)
-        <input
-          type="number"
-          min="12"
-          max="168"
-          step="12"
-          value={filters.horizon}
-          onChange={(e) => update("horizon", Number(e.target.value || 48))}
-        />
-      </label>
-
-      <label className="slider-wrap">
-        Scenario Multiplier ({filters.loadFactor.toFixed(2)}x)
-        <input
-          type="range"
-          min="0.7"
-          max="1.4"
-          step="0.01"
-          value={filters.loadFactor}
-          onChange={(e) => update("loadFactor", Number(e.target.value))}
-        />
-      </label>
+      <SelectField label="Campus" value={filters.campus} onChange={(value) => update("campus", value)} options={metadata.campuses || []} placeholder="All Campuses" />
+      <SelectField label="Department" value={filters.department} onChange={(value) => update("department", value)} options={metadata.departments || []} placeholder="All Departments" />
+      <SelectField label="Building" value={filters.building} onChange={(value) => update("building", value)} options={metadata.buildings || []} placeholder="All Buildings" />
+      <SelectField label="Compare A" value={filters.compareA || "all"} onChange={(value) => update("compareA", value === "all" ? "" : value)} options={metadata.buildings || []} placeholder="Select Building" />
+      <SelectField label="Compare B" value={filters.compareB || "all"} onChange={(value) => update("compareB", value === "all" ? "" : value)} options={metadata.buildings || []} placeholder="Select Building" />
     </section>
   );
 }
