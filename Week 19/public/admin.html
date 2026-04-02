@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Audit Dashboard</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <h1>Admin Audit Dashboard</h1>
+        <div id="sessionPill" class="session-pill">Checking session...</div>
+      </header>
+
+      <section id="status" class="status"></section>
+
+      <section class="panel">
+        <h2>Encrypted Data Access Logs</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>User</th>
+              <th>Role</th>
+              <th>Action</th>
+              <th>Resource</th>
+              <th>Result</th>
+              <th>IP</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="auditLogBody"></tbody>
+        </table>
+      </section>
+
+      <section class="panel">
+        <h2>Anomaly Reports</h2>
+        <div id="anomalyCards" class="anomaly-grid"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>

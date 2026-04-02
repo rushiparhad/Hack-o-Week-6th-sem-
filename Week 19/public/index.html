@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Encrypted Access Console</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel">
+        <h1>Encrypted Data Access Console</h1>
+        <p class="muted">
+          Select a user profile to open the admin audit dashboard.
+        </p>
+        <label for="userSelect">User profile</label>
+        <select id="userSelect">
+          <option value="u1">Ava Admin (admin)</option>
+          <option value="u2">Sam Security (security_analyst)</option>
+          <option value="u3">Dee Developer (engineer)</option>
+          <option value="u4">Ria ReadOnly (viewer)</option>
+        </select>
+        <button id="openDashboard">Open Admin Dashboard</button>
+      </section>
+    </main>
+
+    <script>
+      const select = document.getElementById('userSelect');
+      const button = document.getElementById('openDashboard');
+
+      button.addEventListener('click', () => {
+        const userId = select.value;
+        const url = `/admin.html?userId=${encodeURIComponent(userId)}`;
+        window.location.assign(url);
+      });
+    </script>
+  </body>
+</html>
